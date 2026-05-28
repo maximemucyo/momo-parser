@@ -1,0 +1,6 @@
+{
+  "name": "Income and Expenses Tracker",
+  "description": "An offline-first budget planner built around MTN Mobile Money (MoMo) SMS statement parsing and daily website ad revenue logging with dynamic RWF translation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,22 @@
+{
+  "short_name": "MomoSpend",
+  "name": "MomoSpend: Income and Expenses Tracker",
+  "description": "Offline-first tracker for MTN Mobile Money messages, spending alarms, and daily website revenue.",
+  "icons": [
+    {
+      "src": "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=192&h=192&fit=crop",
+      "type": "image/jpeg",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=512&h=512&fit=crop",
+      "type": "image/jpeg",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0B1528",
+  "theme_color": "#0B1528",
+  "display": "standalone",
+  "orientation": "portrait"
+}
