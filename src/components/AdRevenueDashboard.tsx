@@ -191,7 +191,7 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                   type="date"
                   required
                   disabled={!!editingDate}
-                  className="w-full mt-2 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+                  className="w-full mt-2 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-base md:text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
                   value={date}
                   onChange={e => setDate(e.target.value)}
                 />
@@ -215,7 +215,7 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                     step="any"
                     inputMode="decimal"
                     placeholder="0.00"
-                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-white/20"
+                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-base md:text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-white/20"
                     value={monetag}
                     onChange={e => setMonetag(e.target.value)}
                   />
@@ -227,7 +227,7 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                     step="any"
                     inputMode="decimal"
                     placeholder="0.00"
-                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-white/20"
+                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-base md:text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-white/20"
                     value={adsterra}
                     onChange={e => setAdsterra(e.target.value)}
                   />
@@ -239,7 +239,7 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                     step="any"
                     inputMode="decimal"
                     placeholder="0.00"
-                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-white/20"
+                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-base md:text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-white/20"
                     value={profiton}
                     onChange={e => setProfiton(e.target.value)}
                   />
@@ -260,7 +260,7 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                     type="number"
                     step="any"
                     inputMode="decimal"
-                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-base md:text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
                     value={serverCosts}
                     onChange={e => setServerCosts(e.target.value)}
                   />
@@ -271,7 +271,7 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                     type="number"
                     step="any"
                     inputMode="decimal"
-                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
+                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-base md:text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
                     value={adCosts}
                     onChange={e => setAdCosts(e.target.value)}
                   />

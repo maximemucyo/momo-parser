@@ -114,7 +114,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
   return (
     <div className="space-y-6">
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Net Cashflow */}
         <div id="net-cashflow-card" className="bg-white/10 backdrop-blur-lg border border-white/10 p-5 rounded-3xl relative overflow-hidden group shadow-lg">
           <div className="absolute right-0 top-0 translate-x-3 -translate-y-3 w-28 h-28 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition-all" />
@@ -170,51 +170,6 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
               <span className="text-[11px] text-white/40">Target daily ceiling:</span>
               <span className="font-mono text-[11px] font-bold text-white/70">{formatRwf(settings.dailySpendingLimit)}</span>
             </div>
-          </div>
-        </div>
-
-        {/* Currency & Conversion Rate Config */}
-        <div id="currency-rate-card" className="bg-white/10 backdrop-blur-lg border border-white/10 p-5 rounded-3xl relative overflow-hidden group shadow-lg">
-          <div className="absolute right-0 top-0 translate-x-3 -translate-y-3 w-28 h-28 bg-amber-500/10 rounded-full blur-xl transition-all" />
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">USD Conversion Rate</span>
-            <div className="p-2 bg-amber-500/20 rounded-xl text-amber-300">
-              <Percent className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            {isEditingRate ? (
-              <div className="flex items-center gap-1.5 mt-1">
-                <input
-                  type="number"
-                  className="bg-black/40 border border-white/20 text-white rounded px-2 py-0.5 text-sm font-mono w-24 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  value={rateVal}
-                  onChange={e => setRateVal(e.target.value)}
-                />
-                <button
-                  onClick={handleSaveRate}
-                  className="bg-amber-400 hover:bg-amber-500 text-gray-900 text-xs font-bold px-2 py-1 rounded-lg"
-                >
-                  Save
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <span className="text-xl font-bold font-mono text-amber-300">
-                  1 USD = {settings.usdToRwfRate} RWF
-                </span>
-                <button
-                  onClick={() => setIsEditingRate(true)}
-                  className="text-white/50 hover:text-white transition"
-                  title="Configure USD to RWF Rate"
-                >
-                  <Settings className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-            <p className="text-[11px] text-white/40 flex items-center gap-1">
-              Ad revenue ends at <span className="text-amber-300 font-semibold">9:00 AM Kigali Time</span>
-            </p>
           </div>
         </div>
       </div>

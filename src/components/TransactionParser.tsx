@@ -178,7 +178,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
             </div>
 
             <textarea
-              className="w-full h-32 bg-black/35 border border-white/10 rounded-2xl p-3.5 text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none custom-scrollbar"
+              className="w-full h-32 bg-black/35 border border-white/10 rounded-2xl p-3.5 text-base md:text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none custom-scrollbar"
               placeholder="Paste raw MTN Mobile Money statements here. You can paste multiple messages together, the engine handles bulk extraction automatically..."
               value={inputText}
               onChange={e => setInputText(e.target.value)}
@@ -207,7 +207,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
                   type="text"
                   required
                   placeholder="e.g. Simba Supermarket, Isabelle"
-                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-white/20"
+                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-base md:text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-white/20"
                   value={mCP}
                   onChange={e => setMCP(e.target.value)}
                 />
@@ -216,7 +216,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
               <div>
                 <label className="text-white/55 text-xs font-bold block mb-1">Transaction Type</label>
                 <select
-                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-blue-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-base md:text-xs text-blue-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   value={mType}
                   onChange={e => setMType(e.target.value as any)}
                 >
@@ -235,7 +235,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
                   step="any"
                   inputMode="decimal"
                   placeholder="e.g. 5000"
-                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-white/20"
+                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-base md:text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-white/20"
                   value={mAmount}
                   onChange={e => setMAmount(e.target.value)}
                 />
@@ -248,7 +248,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
                   step="any"
                   inputMode="decimal"
                   placeholder="e.g. 100"
-                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-white/20"
+                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-base md:text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-white/20"
                   value={mFee}
                   onChange={e => setMFee(e.target.value)}
                 />
@@ -258,7 +258,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
                 <label className="text-white/55 text-xs font-bold block mb-1">Post Date</label>
                 <input
                   type="date"
-                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-base md:text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                   value={mDate}
                   onChange={e => setMDate(e.target.value)}
                 />
