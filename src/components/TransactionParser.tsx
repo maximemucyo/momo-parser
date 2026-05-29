@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { MomoTransaction } from '../types';
-import { parseMomoMessage } from '../utils/momoParser';
+import { parseMomoMessage, autoCategorize } from '../utils/momoParser';
 import { Clipboard, Check, HelpCircle, FilePlus2, Plus, ArrowRight } from 'lucide-react';
 
 interface TransactionParserProps {
   onAddTransactions: (txs: MomoTransaction[]) => void;
   existingIds: string[];
+  customCategoryMappings?: Record<string, string>;
 }
 
 export const TransactionParser: React.FC<TransactionParserProps> = ({
   onAddTransactions,
   existingIds,
+  customCategoryMappings = {},
 }) => {
   const [inputText, setInputText] = useState('');
   const [activeTab, setActiveTab] = useState<'paste' | 'manual'>('paste');
@@ -37,7 +39,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
     let duplicates = 0;
 
     for (const msg of lines) {
-      const tx = parseMomoMessage(msg);
+      const tx = parseMomoMessage(msg, customCategoryMappings);
       if (tx) {
         if (existingIds.includes(tx.id)) {
           duplicates++;
@@ -95,7 +97,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
       counterparty: mCP,
       timestamp: `${mDate} 12:00:00`,
       formattedDate: mDate,
-      category: isReceive ? 'Income' : 'Other Expenses',
+      category: autoCategorize(mCP, mType, customCategoryMappings),
       isCustom: true
     };
 

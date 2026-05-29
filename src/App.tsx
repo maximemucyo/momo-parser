@@ -6,10 +6,14 @@ import { TransactionParser } from './components/TransactionParser';
 import { AdRevenueDashboard } from './components/AdRevenueDashboard';
 import { VisualReports } from './components/VisualReports';
 import { TransactionList } from './components/TransactionList';
-import { Wallet, Landmark, RefreshCw, Layers, Calendar, BarChart3, HelpCircle, FileTerminal, ArrowRight, Sun, RotateCcw, MessageSquarePlus, Bell, LogOut, Check } from 'lucide-react';
+import { Wallet, Landmark, RefreshCw, Layers, Calendar, BarChart3, HelpCircle, FileTerminal, ArrowRight, Sun, Moon, RotateCcw, MessageSquarePlus, Bell, LogOut, Check } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'messages' | 'analytics' | 'earnings' | 'ledger'>('messages');
+
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('momo_theme') as 'light' | 'dark') || 'dark';
+  });
 
   const [transactions, setTransactions] = useState<MomoTransaction[]>([]);
   const [revenueRecords, setRevenueRecords] = useState<AdRevenueRecord[]>([]);
@@ -36,6 +40,20 @@ export default function App() {
       setNotificationPermission(Notification.permission);
     }
   }, []);
+
+  // Synchronize theme to document body class list
+  useEffect(() => {
+    if (theme === 'light') {
+      document.body.classList.add('light');
+    } else {
+      document.body.classList.remove('light');
+    }
+    localStorage.setItem('momo_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   // Daily 7 PM check loop (checks if 7 PM and triggers reminder once per day)
   useEffect(() => {
@@ -260,14 +278,41 @@ export default function App() {
     const updatedMappings = { ...settings.customCategoryMappings, [keyword]: category };
     const newSettings = { ...settings, customCategoryMappings: updatedMappings };
     setSettings(newSettings);
+
+    // Apply retroactively to existing loaded transactions containing the keyword
+    const updatedTxs = transactions.map(t => {
+      const normCP = t.counterparty.toLowerCase();
+      if (normCP.includes(keyword.toLowerCase())) {
+        return { ...t, category };
+      }
+      return t;
+    });
+
+    setTransactions(updatedTxs);
+
+    const changedTxs = updatedTxs.filter((t, idx) => {
+      const orig = transactions[idx];
+      return orig && orig.category !== t.category;
+    });
+
     try {
+      // 1. Save Settings (includes current mappings)
       await apiFetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSettings)
       });
+
+      // 2. Persistently bulk update the category for any mutated transactions in SQLite
+      if (changedTxs.length > 0) {
+        await apiFetch('/api/transactions/bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(changedTxs)
+        });
+      }
     } catch (err) {
-      console.error('Failed to save category mapping to SQLite', err);
+      console.error('Failed to save category mapping or apply retroactively to SQLite', err);
     }
   };
 
@@ -295,7 +340,19 @@ export default function App() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#070b15] text-white flex flex-col items-center justify-center p-4 selection:bg-blue-500 font-sans">
+      <div className="min-h-screen bg-transparent text-white flex flex-col items-center justify-center p-4 selection:bg-blue-500 font-sans relative">
+        {/* Floating Theme Toggle */}
+        <div className="absolute top-4 right-4 z-40">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 border border-white/15 hover:bg-white/10 transition cursor-pointer text-white shadow-md"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-300" /> : <Moon className="w-3.5 h-3.5 text-blue-500" />}
+            <span className="font-sans text-[11px] font-bold">{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+          </button>
+        </div>
+
         <div className="w-full max-w-sm bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-xl shadow-2xl relative overflow-hidden">
           {/* Ambient radial blur */}
           <div className="absolute right-0 top-0 translate-x-1/3 -translate-y-1/3 w-36 h-36 bg-blue-500/15 rounded-full blur-2xl" />
@@ -369,6 +426,16 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="text-[10px] sm:text-xs text-white/80 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl cursor-pointer transition flex items-center gap-1 font-semibold"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {theme === 'dark' ? <Sun className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-amber-300" /> : <Moon className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-500" />}
+              <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+            </button>
+
             {/* Reset Button */}
             <button
               onClick={handleResetData}
@@ -469,6 +536,7 @@ export default function App() {
                     <TransactionParser
                       onAddTransactions={handleAddTransactions}
                       existingIds={transactions.map(t => t.id)}
+                      customCategoryMappings={settings.customCategoryMappings}
                     />
                   </div>
 

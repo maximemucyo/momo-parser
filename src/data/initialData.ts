@@ -29,7 +29,7 @@ export const INITIAL_AD_REVENUES: AdRevenueRecord[] = [
     monetag: 15.5,
     adsterra: 12.8,
     profiton: 9.4,
-    serverCosts: 1.5,
+    serverCosts: 0.0,
     adCosts: 5.0,
     checkedAt: "2026-05-25T23:00:00Z"
   },
@@ -38,7 +38,7 @@ export const INITIAL_AD_REVENUES: AdRevenueRecord[] = [
     monetag: 18.2,
     adsterra: 14.5,
     profiton: 11.0,
-    serverCosts: 1.5,
+    serverCosts: 0.0,
     adCosts: 6.0,
     checkedAt: "2026-05-26T23:00:00Z"
   },
@@ -47,7 +47,7 @@ export const INITIAL_AD_REVENUES: AdRevenueRecord[] = [
     monetag: 12.0,
     adsterra: 8.5,
     profiton: 5.2,
-    serverCosts: 1.5,
+    serverCosts: 0.0,
     adCosts: 4.5,
     checkedAt: "2026-05-27T23:00:00Z"
   },
@@ -56,7 +56,7 @@ export const INITIAL_AD_REVENUES: AdRevenueRecord[] = [
     monetag: 22.4,
     adsterra: 19.1,
     profiton: 13.8,
-    serverCosts: 1.5,
+    serverCosts: 0.0,
     adCosts: 8.0,
     checkedAt: "2026-05-28T13:35:00Z"
   }

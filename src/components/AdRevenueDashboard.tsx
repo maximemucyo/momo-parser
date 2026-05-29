@@ -19,7 +19,7 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
   const [monetag, setMonetag] = useState('');
   const [adsterra, setAdsterra] = useState('');
   const [profiton, setProfiton] = useState('');
-  const [serverCosts, setServerCosts] = useState('1.5'); // default low server cost
+  const [serverCosts, setServerCosts] = useState('0.0'); // default zero server cost
   const [adCosts, setAdCosts] = useState('0.0');
 
   const [dateTarget, setDateTarget] = useState<'today' | 'yesterday' | 'custom'>('today');
