@@ -5,7 +5,7 @@ import { createServer as createViteServer } from "vite";
 import { getInitialMomoTransactions, INITIAL_AD_REVENUES, DEFAULT_SETTINGS } from "./src/data/initialData";
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
