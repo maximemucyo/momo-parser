@@ -154,6 +154,36 @@ async function startServer() {
 
   // APIS BEFORE VITE MIDDLEWARE
 
+  // --- AUTHENTICATION ---
+  app.post("/api/login", (req, res) => {
+    try {
+      const { email, password } = req.body;
+      if (email === "maximemucyo1@gmail.com" && password === "Welcome@1234") {
+        res.json({ token: "m_token_secure_413219705275" });
+      } else {
+        res.status(401).json({ error: "Invalid credentials" });
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Secure all subsequent API routes
+  const requireAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const authHeader = req.headers["authorization"];
+    if (authHeader === "Bearer m_token_secure_413219705275") {
+      next();
+    } else {
+      res.status(401).json({ error: "Unauthorized. Please log in first." });
+    }
+  };
+
+  // Apply authorization check to all other /api/... paths
+  app.use("/api/settings", requireAuth);
+  app.use("/api/transactions", requireAuth);
+  app.use("/api/ad-revenue", requireAuth);
+  app.use("/api/reset", requireAuth);
+
   // --- SETTINGS APIS ---
   app.get("/api/settings", async (req, res) => {
     try {

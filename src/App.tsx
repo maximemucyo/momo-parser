@@ -18,7 +18,7 @@ export default function App() {
 
   // Authentication States
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('momo_auth_logged') === 'true';
+    return localStorage.getItem('momo_auth_logged') === 'true' && !!localStorage.getItem('momo_auth_token');
   });
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -73,19 +73,45 @@ export default function App() {
     return () => clearInterval(interval);
   }, [reminderActive, notificationPermission]);
 
-  const handleLogin = (e: FormEvent) => {
+  const apiFetch = async (url: string, options: RequestInit = {}) => {
+    const token = localStorage.getItem('momo_auth_token') || '';
+    const headers = {
+      ...options.headers,
+      'Authorization': `Bearer ${token}`
+    };
+    const response = await fetch(url, { ...options, headers });
+    if (response.status === 401) {
+      handleLogout();
+      throw new Error('Unauthorized');
+    }
+    return response;
+  };
+
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    if (loginEmail.trim() === 'maximemucyo1@gmail.com' && loginPassword === 'Welcome@1234') {
-      localStorage.setItem('momo_auth_logged', 'true');
-      setIsAuthenticated(true);
-      setLoginError('');
-    } else {
-      setLoginError('Invalid security email address or passcode.');
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: loginEmail, password: loginPassword })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('momo_auth_token', data.token);
+        localStorage.setItem('momo_auth_logged', 'true');
+        setIsAuthenticated(true);
+        setLoginError('');
+      } else {
+        setLoginError('Invalid security email address or passcode.');
+      }
+    } catch (err) {
+      setLoginError('Authentication failed. Server could not be reached.');
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem('momo_auth_logged');
+    localStorage.removeItem('momo_auth_token');
     setIsAuthenticated(false);
     setLoginEmail('');
     setLoginPassword('');
@@ -118,15 +144,19 @@ export default function App() {
     localStorage.setItem('momo_reminder_active', String(nextState));
   };
 
-  // Load state from SQLite API on mount
+  // Load state from SQLite API on mount (re-triggers when isAuthenticated updates)
   useEffect(() => {
+    if (!isAuthenticated) {
+      setIsLoading(false);
+      return;
+    }
     let active = true;
     const loadFromSQLite = async () => {
       try {
         const [resSettings, resTxs, resRevenue] = await Promise.all([
-          fetch('/api/settings').then(r => r.json()),
-          fetch('/api/transactions').then(r => r.json()),
-          fetch('/api/ad-revenue').then(r => r.json())
+          apiFetch('/api/settings').then(r => r.json()),
+          apiFetch('/api/transactions').then(r => r.json()),
+          apiFetch('/api/ad-revenue').then(r => r.json())
         ]);
         if (active) {
           setSettings(resSettings);
@@ -145,13 +175,13 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [isAuthenticated]);
 
   // Handlers
   const handleAddTransactions = async (newTxs: MomoTransaction[]) => {
     setTransactions(prev => [...newTxs, ...prev]);
     try {
-      await fetch('/api/transactions/bulk', {
+      await apiFetch('/api/transactions/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newTxs)
@@ -168,7 +198,7 @@ export default function App() {
       return [...filtered, rec];
     });
     try {
-      await fetch('/api/ad-revenue', {
+      await apiFetch('/api/ad-revenue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(rec)
@@ -181,7 +211,7 @@ export default function App() {
   const handleDeleteRevenueRecord = async (date: string) => {
     setRevenueRecords(prev => prev.filter(r => r.date !== date));
     try {
-      await fetch(`/api/ad-revenue/${date}`, {
+      await apiFetch(`/api/ad-revenue/${date}`, {
         method: 'DELETE'
       });
     } catch (err) {
@@ -192,7 +222,7 @@ export default function App() {
   const handleDeleteTransaction = async (id: string) => {
     setTransactions(prev => prev.filter(t => t.id !== id));
     try {
-      await fetch(`/api/transactions/${id}`, {
+      await apiFetch(`/api/transactions/${id}`, {
         method: 'DELETE'
       });
     } catch (err) {
@@ -203,7 +233,7 @@ export default function App() {
   const handleUpdateTransactionCategory = async (id: string, newCategory: string) => {
     setTransactions(prev => prev.map(t => t.id === id ? { ...t, category: newCategory } : t));
     try {
-      await fetch('/api/transactions/update-category', {
+      await apiFetch('/api/transactions/update-category', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, category: newCategory })
@@ -216,7 +246,7 @@ export default function App() {
   const handleUpdateSettings = async (newSettings: AppSettings) => {
     setSettings(newSettings);
     try {
-      await fetch('/api/settings', {
+      await apiFetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSettings)
@@ -231,7 +261,7 @@ export default function App() {
     const newSettings = { ...settings, customCategoryMappings: updatedMappings };
     setSettings(newSettings);
     try {
-      await fetch('/api/settings', {
+      await apiFetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSettings)
@@ -246,11 +276,11 @@ export default function App() {
     if (window.confirm('Are you sure you want to reset the SQLite database back to the default demo statement data? Your custom edits will be re-initialized.')) {
       setIsLoading(true);
       try {
-        await fetch('/api/reset', { method: 'POST' });
+        await apiFetch('/api/reset', { method: 'POST' });
         const [resSettings, resTxs, resRevenue] = await Promise.all([
-          fetch('/api/settings').then(r => r.json()),
-          fetch('/api/transactions').then(r => r.json()),
-          fetch('/api/ad-revenue').then(r => r.json())
+          apiFetch('/api/settings').then(r => r.json()),
+          apiFetch('/api/transactions').then(r => r.json()),
+          apiFetch('/api/ad-revenue').then(r => r.json())
         ]);
         setSettings(resSettings);
         setTransactions(resTxs);
