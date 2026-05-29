@@ -19,24 +19,60 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
   const [rateVal, setRateVal] = useState(settings.usdToRwfRate.toString());
   const [isEditingLimit, setIsEditingLimit] = useState(false);
   const [limitVal, setLimitVal] = useState(settings.dailySpendingLimit.toString());
+  const [summaryRange, setSummaryRange] = useState<7 | 14 | 30 | 'all'>('all');
 
-  // Calculations
-  const totalRwfSpent = transactions
-    .filter(t => t.type !== 'cash_in')
-    .reduce((sum, t) => sum + t.amount + t.fee, 0);
-
-  const totalRwfFees = transactions
-    .filter(t => t.type !== 'cash_in')
-    .reduce((sum, t) => sum + t.fee, 0);
-
-  const totalRwfInbound = transactions
-    .filter(t => t.type === 'cash_in')
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  // Today calculations
+  // Today calculations (always based on raw absolute dates)
   const todayStr = new Date().toISOString().substring(0, 10);
   const todaysTransactions = transactions.filter(t => t.formattedDate === todayStr && t.type !== 'cash_in');
   const todaysSpent = todaysTransactions.reduce((sum, t) => sum + t.amount + t.fee, 0);
+
+  // Date and anchor calculations for selected window
+  const anchorDate = new Date();
+  const filteredTxs = transactions.filter(t => {
+    if (summaryRange === 'all') return true;
+    const tDate = new Date(t.formattedDate);
+    const diffMs = anchorDate.getTime() - tDate.getTime();
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    return diffDays <= summaryRange;
+  });
+
+  const filteredRevs = revenueRecords.filter(r => {
+    if (summaryRange === 'all') return true;
+    const rDate = new Date(r.date);
+    const diffMs = anchorDate.getTime() - rDate.getTime();
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    return diffDays <= summaryRange;
+  });
+
+  let rangeLabel = '';
+  if (summaryRange === 'all') {
+    const dates = [...transactions.map(t => t.formattedDate), ...revenueRecords.map(r => r.date)].filter(Boolean).sort();
+    if (dates.length > 0) {
+      const minD = new Date(dates[0]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const maxD = new Date(dates[dates.length - 1]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      rangeLabel = `from ${minD} to ${maxD}`;
+    } else {
+      rangeLabel = 'All Time';
+    }
+  } else {
+    const startThreshold = new Date(anchorDate.getTime() - summaryRange * 24 * 60 * 60 * 1000);
+    const startFmt = startThreshold.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const endFmt = anchorDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    rangeLabel = `from ${startFmt} to ${endFmt}`;
+  }
+
+  // Calculations
+  const totalRwfSpent = filteredTxs
+    .filter(t => t.type !== 'cash_in')
+    .reduce((sum, t) => sum + t.amount + t.fee, 0);
+
+  const totalRwfFees = filteredTxs
+    .filter(t => t.type !== 'cash_in')
+    .reduce((sum, t) => sum + t.fee, 0);
+
+  const totalRwfInbound = filteredTxs
+    .filter(t => t.type === 'cash_in')
+    .reduce((sum, t) => sum + t.amount, 0);
 
   // Daily revenue computations
   const getDailyRevenueRwf = (record: AdRevenueRecord): number => {
@@ -54,9 +90,9 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
     return (record.serverCosts + record.adCosts) * settings.usdToRwfRate;
   };
 
-  const totalRevenueRwf = revenueRecords.reduce((sum, r) => sum + getDailyRevenueRwf(r), 0);
-  const totalGrossRevenueRwf = revenueRecords.reduce((sum, r) => sum + getDailyGrossRevenueRwf(r), 0);
-  const totalFixedCostsRwf = revenueRecords.reduce((sum, r) => sum + getDailyCostsRwf(r), 0);
+  const totalRevenueRwf = filteredRevs.reduce((sum, r) => sum + getDailyRevenueRwf(r), 0);
+  const totalGrossRevenueRwf = filteredRevs.reduce((sum, r) => sum + getDailyGrossRevenueRwf(r), 0);
+  const totalFixedCostsRwf = filteredRevs.reduce((sum, r) => sum + getDailyCostsRwf(r), 0);
 
   // Today's revenue record
   const todaysRevenueRec = revenueRecords.find(r => r.date === todayStr);
@@ -113,6 +149,30 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Range Selection Control & Duration Label */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/5 border border-white/10 rounded-2xl p-4">
+        <div>
+          <span className="text-white/50 text-[10px] font-bold uppercase tracking-wider block">Currently Auditing:</span>
+          <span className="text-xs font-semibold text-blue-200 font-mono capitalize">
+            {summaryRange === 'all' ? 'All Ledger Records' : `${summaryRange} Day Window`}{' '}
+            <span className="text-white/40 font-normal">({rangeLabel})</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-1 bg-black/35 p-1 border border-white/10 rounded-xl text-xs font-semibold shadow-inner self-start sm:self-auto">
+          {([7, 14, 30, 'all'] as const).map(lim => (
+            <button
+              key={lim}
+              onClick={() => setSummaryRange(lim)}
+              className={`px-3 py-1.5 rounded-lg cursor-pointer transition capitalize ${
+                summaryRange === lim ? 'bg-blue-600/80 text-white font-bold shadow' : 'text-white/60 hover:text-white'
+              }`}
+            >
+              {lim === 'all' ? 'All Time' : `${lim} Days`}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Net Cashflow */}
@@ -153,21 +213,21 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
           </div>
         </div>
 
-        {/* Average Daily Spending vs 20K Target */}
+        {/* Today's MoMo Spend */}
         <div id="avg-daily-spending-card" className="bg-white/10 backdrop-blur-lg border border-white/10 p-5 rounded-3xl relative overflow-hidden group shadow-lg">
-          <div className={`absolute right-0 top-0 translate-x-3 -translate-y-3 w-28 h-28 ${avgDailySpending > settings.dailySpendingLimit ? 'bg-amber-500/10' : 'bg-blue-500/10'} rounded-full blur-xl transition-all`} />
+          <div className={`absolute right-0 top-0 translate-x-3 -translate-y-3 w-28 h-28 ${todaysSpent > settings.dailySpendingLimit ? 'bg-amber-500/10' : 'bg-blue-500/10'} rounded-full blur-xl transition-all`} />
           <div className="flex items-center justify-between mb-3">
-            <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">Daily Est. Spending</span>
-            <div className={`p-2 rounded-xl ${avgDailySpending > settings.dailySpendingLimit ? 'bg-amber-500/20 text-amber-300' : 'bg-blue-500/20 text-blue-200'}`}>
+            <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">Today's MoMo Spend</span>
+            <div className={`p-2 rounded-xl ${todaysSpent > settings.dailySpendingLimit ? 'bg-amber-500/20 text-amber-300' : 'bg-blue-500/20 text-blue-200'}`}>
               <Wallet className="w-5 h-5" />
             </div>
           </div>
           <div className="space-y-1 animate-fade-in">
-            <h3 className={`text-2xl font-bold font-mono ${avgDailySpending > settings.dailySpendingLimit ? 'text-amber-300' : 'text-blue-200'}`}>
-              {formatRwf(avgDailySpending)}
+            <h3 className={`text-2xl font-bold font-mono ${todaysSpent > settings.dailySpendingLimit ? 'text-amber-300' : 'text-blue-200'}`}>
+              {formatRwf(todaysSpent)}
             </h3>
             <div className="flex items-center justify-between gap-1">
-              <span className="text-[11px] text-white/40">Target daily ceiling:</span>
+              <span className="text-[11px] text-white/40">Target daily limit:</span>
               <span className="font-mono text-[11px] font-bold text-white/70">{formatRwf(settings.dailySpendingLimit)}</span>
             </div>
           </div>
@@ -212,35 +272,35 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
             {/* Limit Warning bar */}
             <div>
               <div className="flex justify-between items-center text-xs text-white/70 mb-1.5">
-                <span>Est. Daily Spending Vs Target Limit</span>
+                <span>Today's Spending Vs Target Limit</span>
                 <span className="font-mono font-bold">
-                  {Math.round((avgDailySpending / settings.dailySpendingLimit) * 100)}%
+                  {Math.round((todaysSpent / settings.dailySpendingLimit) * 100)}%
                 </span>
               </div>
               <div className="w-full bg-white/10 h-2.5 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
-                    avgDailySpending > settings.dailySpendingLimit ? 'bg-rose-500' : 'bg-blue-500'
+                    todaysSpent > settings.dailySpendingLimit ? 'bg-rose-500' : 'bg-blue-500'
                   }`}
-                  style={{ width: `${Math.min(100, (avgDailySpending / settings.dailySpendingLimit) * 100)}%` }}
+                  style={{ width: `${Math.min(100, (todaysSpent / settings.dailySpendingLimit) * 100)}%` }}
                 />
               </div>
             </div>
 
-            {avgDailySpending > settings.dailySpendingLimit ? (
+            {todaysSpent > settings.dailySpendingLimit ? (
               <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-200 rounded-2xl flex items-start gap-3 text-xs leading-relaxed animate-pulse">
                 <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-red-300 font-bold block mb-0.5">ESTIMATED SPENDING CEILING VIOLATED!</strong>
-                  Your daily average spent (<span className="font-mono font-bold">{formatRwf(avgDailySpending)}</span>) exceeds your targeted daily ceiling limit of <span className="font-mono font-bold">{formatRwf(settings.dailySpendingLimit)}</span>. Paste fewer expenses or raise the profit ceiling.
+                  <strong className="text-red-300 font-bold block mb-0.5">TODAY'S SPENDING CEILING VIOLATED!</strong>
+                  Today you spent <span className="font-mono font-bold">{formatRwf(todaysSpent)}</span> which exceeds your daily ceiling limit of <span className="font-mono font-bold">{formatRwf(settings.dailySpendingLimit)}</span>. Try to stay within budget today!
                 </div>
               </div>
             ) : (
               <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-100 rounded-2xl flex items-start gap-3 text-xs">
                 <Award className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-emerald-300 font-bold block mb-0.5">BUDGET SAFE</strong>
-                  Your daily average spent (<span className="font-mono font-bold">{formatRwf(avgDailySpending)}</span>) is currently keeping below the limit of <span className="font-mono font-bold">{formatRwf(settings.dailySpendingLimit)}</span>. Beautifully managed!
+                  <strong className="text-emerald-300 font-bold block mb-0.5">TODAY'S BUDGET SAFE</strong>
+                  Today you spent <span className="font-mono font-bold">{formatRwf(todaysSpent)}</span> which is safely below the limit of <span className="font-mono font-bold">{formatRwf(settings.dailySpendingLimit)}</span>. Beautifully managed!
                 </div>
               </div>
             )}

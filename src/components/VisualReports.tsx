@@ -14,6 +14,7 @@ export const VisualReports: React.FC<VisualReportsProps> = ({
   settings,
 }) => {
   const [reportDaysLimit, setReportDaysLimit] = useState<7 | 14 | 30>(7);
+  const [activeHoverIdx, setActiveHoverIdx] = useState<number | null>(null);
 
   // Group transactions by date (excluding cash_in)
   const spendByDate: Record<string, number> = {};
@@ -182,6 +183,27 @@ export const VisualReports: React.FC<VisualReportsProps> = ({
           <div className="space-y-3">
             {/* SVG Plot */}
             <div className="relative w-full overflow-hidden bg-black/25 rounded-2xl border border-white/5 p-2">
+              {/* Dynamic Interactive Tooltip Box */}
+              {activeHoverIdx !== null ? (
+                <div className="absolute top-3 right-3 bg-slate-900/90 border border-white/10 rounded-2xl px-3.5 py-2 shadow-2xl backdrop-blur-md text-[11px] space-y-1 animate-fade-in z-20 pointer-events-none min-w-[200px] font-semibold">
+                  <p className="text-white font-bold font-mono text-[10px] tracking-wide border-b border-white/10 pb-1 mb-1 flex justify-between">
+                    <span>Date:</span> <span>{allRecordedDates[activeHoverIdx]}</span>
+                  </p>
+                  <p className="text-emerald-400 flex justify-between font-mono">
+                    <span>Website Profit:</span>
+                    <span>{formatRwfFull(revByDate[allRecordedDates[activeHoverIdx]] || 0)}</span>
+                  </p>
+                  <p className="text-rose-400 flex justify-between font-mono">
+                    <span>MoMo Spent:</span>
+                    <span>{formatRwfFull(spendByDate[allRecordedDates[activeHoverIdx]] || 0)}</span>
+                  </p>
+                </div>
+              ) : (
+                <div className="absolute top-3 right-3 bg-white/5 text-white/40 border border-white/5 rounded-xl px-2.5 py-1 text-[9px] uppercase font-mono tracking-wider pointer-events-none">
+                  Hover columns to read exact values
+                </div>
+              )}
+
               <svg viewBox={`0 0 ${graphWidth} ${graphHeight}`} className="w-full h-auto text-white/80 overflow-visible">
                 {/* Horizontal gridlines */}
                 {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
@@ -208,6 +230,20 @@ export const VisualReports: React.FC<VisualReportsProps> = ({
                     </g>
                   );
                 })}
+
+                {/* Live Vertical Snapping Line on Hover */}
+                {activeHoverIdx !== null && (
+                  <line
+                    x1={getX(activeHoverIdx)}
+                    y1={paddingY}
+                    x2={getX(activeHoverIdx)}
+                    y2={graphHeight - paddingY}
+                    stroke="rgba(255, 255, 255, 0.25)"
+                    strokeWidth="1.5"
+                    strokeDasharray="2 2"
+                    className="transition-all duration-150"
+                  />
+                )}
 
                 {/* Targetspending Limit line (dashed RED helper) */}
                 <g className="opacity-60">
@@ -248,8 +284,8 @@ export const VisualReports: React.FC<VisualReportsProps> = ({
                           key={`rev-c-${idx}`}
                           cx={getX(idx)}
                           cy={getY(val)}
-                          r="4"
-                          className="fill-[#34d399] stroke-black/40 stroke-2 hover:r-6 cursor-pointer transition"
+                          r={activeHoverIdx === idx ? 6.5 : 4}
+                          className="fill-[#34d399] stroke-black/40 stroke-2 cursor-pointer transition-all duration-150"
                           title={`Revenue ${date}: ${formatRwfFull(val)}`}
                         />
                       );
@@ -274,8 +310,8 @@ export const VisualReports: React.FC<VisualReportsProps> = ({
                           key={`sd-c-${idx}`}
                           cx={getX(idx)}
                           cy={getY(val)}
-                          r="4"
-                          className="fill-[#f43f5e] stroke-black/40 stroke-2 hover:r-6 cursor-pointer transition"
+                          r={activeHoverIdx === idx ? 6.5 : 4}
+                          className="fill-[#f43f5e] stroke-black/40 stroke-2 cursor-pointer transition-all duration-150"
                           title={`Spent ${date}: ${formatRwfFull(val)}`}
                         />
                       );
@@ -291,11 +327,34 @@ export const VisualReports: React.FC<VisualReportsProps> = ({
                       key={`lbl-${idx}`}
                       x={getX(idx)}
                       y={graphHeight - 8}
-                      className="text-[9px] font-mono fill-white/40 font-medium"
+                      className={`text-[9px] font-mono font-medium transition-all duration-150 ${activeHoverIdx === idx ? 'fill-blue-300 font-bold' : 'fill-white/40'}`}
                       textAnchor="middle"
                     >
                       {dayStr}
                     </text>
+                  );
+                })}
+
+                {/* High-accuracy Rect Hit Zones for Hover capture */}
+                {allRecordedDates.map((date, idx) => {
+                  const width = allRecordedDates.length > 1
+                    ? (graphWidth - paddingX * 2) / (allRecordedDates.length - 1)
+                    : graphWidth;
+                  const startX = getX(idx) - width / 2;
+                  return (
+                    <rect
+                      key={`hit-${idx}`}
+                      x={startX}
+                      y={paddingY}
+                      width={width}
+                      height={graphHeight - paddingY * 2}
+                      fill="transparent"
+                      className="cursor-pointer"
+                      onMouseEnter={() => setActiveHoverIdx(idx)}
+                      onTouchStart={() => setActiveHoverIdx(idx)}
+                      onMouseLeave={() => setActiveHoverIdx(null)}
+                      onTouchEnd={() => setActiveHoverIdx(null)}
+                    />
                   );
                 })}
               </svg>

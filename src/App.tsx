@@ -286,7 +286,7 @@ export default function App() {
                 type="email"
                 required
                 className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-base md:text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-white/25 shadow-inner"
-                placeholder="maximemucyo1@gmail.com"
+                placeholder="Enter your email"
                 value={loginEmail}
                 onChange={e => setLoginEmail(e.target.value)}
               />
