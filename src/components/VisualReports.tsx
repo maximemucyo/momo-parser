@@ -150,8 +150,8 @@ export const VisualReports: React.FC<VisualReportsProps> = ({
       <div className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl lg:col-span-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-250 flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-indigo-300" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-blue-200 flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-blue-300" />
               RWF Income vs Daily Expenses
             </h3>
             <span className="text-[11px] text-white/50">Comparing network net RWF profit to actual cash spent.</span>
@@ -164,7 +164,7 @@ export const VisualReports: React.FC<VisualReportsProps> = ({
                 key={lim}
                 onClick={() => setReportDaysLimit(lim)}
                 className={`px-3 py-1.5 rounded-lg cursor-pointer transition ${
-                  reportDaysLimit === lim ? 'bg-indigo-600/80 text-white font-bold' : 'text-white/50 hover:text-white'
+                  reportDaysLimit === lim ? 'bg-blue-600/80 text-white font-bold' : 'text-white/50 hover:text-white'
                 }`}
               >
                 {lim} Days
@@ -322,16 +322,16 @@ export const VisualReports: React.FC<VisualReportsProps> = ({
 
       {/* Category Expenses Breakdown List (High-contrast customized Donut structure) */}
       <div className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl flex flex-col">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-250 mb-4 flex items-center gap-2">
-          <PieChart className="w-4 h-4 text-indigo-300" />
+        <h3 className="text-sm font-bold uppercase tracking-wider text-blue-200 mb-4 flex items-center gap-2">
+          <PieChart className="w-4 h-4 text-blue-300" />
           Budget Allocation
         </h3>
 
         <div className="flex-1 flex flex-col justify-between">
           {categoriesOrdered.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-white/40 text-xs py-10">
-              <p className="font-bold mb-1">No transaction records logged</p>
-              <p>Add some MoMo transactions to view automated categories division.</p>
+               <p className="font-bold mb-1">No transaction records logged</p>
+               <p>Add some MoMo transactions to view automated categories division.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -342,7 +342,7 @@ export const VisualReports: React.FC<VisualReportsProps> = ({
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <span className={`w-2.5 h-2.5 rounded-full ${getCategoryColor(cat.category)}`} />
-                        <span className="text-white/80 font-medium group-hover:text-indigo-200 transition">{cat.category}</span>
+                        <span className="text-white/80 font-medium group-hover:text-blue-200 transition">{cat.category}</span>
                       </div>
                       <div className="text-right">
                         <span className="font-mono text-white/90 font-semibold">{formatRwfFull(cat.amount)}</span>{' '}
@@ -364,7 +364,7 @@ export const VisualReports: React.FC<VisualReportsProps> = ({
               <div className="p-3.5 bg-black/35 border border-white/10 rounded-2xl space-y-2 mt-2">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-white/50 flex items-center gap-1.5 font-bold uppercase tracking-wider text-[10px]">
-                    <Wallet className="w-3.5 h-3.5 text-indigo-300" /> Total Expense Sum
+                    <Wallet className="w-3.5 h-3.5 text-blue-300" /> Total Expense Sum
                   </span>
                   <span className="font-mono text-rose-300 font-bold">{formatRwfFull(totalSpending)}</span>
                 </div>

@@ -162,14 +162,14 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-white flex flex-col selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-transparent text-white flex flex-col selection:bg-blue-500 selection:text-white">
       {/* Top Header navbar with zero margin clutter */}
       <header className="border-b border-white/10 bg-white/5 backdrop-blur-md px-4 py-3.5 sticky top-0 z-30 shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 w-full">
           <div>
             <h1 className="text-sm sm:text-base font-extrabold text-white tracking-tight flex items-center gap-2">
               MomoSpend Suite
-              <span className="hidden sm:inline-block bg-indigo-400/10 text-indigo-300 text-[9px] font-mono px-2 py-0.5 rounded-full border border-white/10 uppercase tracking-widest font-bold">
+              <span className="hidden sm:inline-block bg-blue-400/10 text-blue-300 text-[9px] font-mono px-2 py-0.5 rounded-full border border-white/10 uppercase tracking-widest font-bold">
                 PWA Ready
               </span>
             </h1>
@@ -182,7 +182,7 @@ export default function App() {
             {/* Reset Button */}
             <button
               onClick={handleResetData}
-              className="text-[10px] sm:text-xs text-indigo-205 hover:text-white bg-indigo-650/10 hover:bg-slate-500/20 border border-indigo-505/20 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl cursor-pointer transition flex items-center gap-1"
+              className="text-[10px] sm:text-xs text-blue-200 hover:text-white bg-blue-600/10 hover:bg-slate-500/20 border border-blue-500/20 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-xl cursor-pointer transition flex items-center gap-1"
               title="Reset records to default demo statements"
             >
               <RotateCcw className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
@@ -190,7 +190,7 @@ export default function App() {
             </button>
             
             <div className="flex items-center gap-1 bg-black/30 px-2.5 py-1 sm:py-1.5 rounded-xl border border-white/10 text-[10px] sm:text-[11px] font-mono text-white/60">
-              <strong className="text-indigo-300 font-bold">{settings.usdToRwfRate} RWF/$</strong>
+              <strong className="text-blue-300 font-bold">{settings.usdToRwfRate} RWF/$</strong>
             </div>
           </div>
         </div>
@@ -203,7 +203,7 @@ export default function App() {
             onClick={() => setActiveTab('trends')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition ${
               activeTab === 'trends'
-                ? 'bg-indigo-600/80 text-white font-bold shadow'
+                ? 'bg-blue-600/80 text-white font-bold shadow'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -214,7 +214,7 @@ export default function App() {
             onClick={() => setActiveTab('earnings')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition ${
               activeTab === 'earnings'
-                ? 'bg-indigo-600/80 text-white font-bold shadow'
+                ? 'bg-blue-600/80 text-white font-bold shadow'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -225,7 +225,7 @@ export default function App() {
             onClick={() => setActiveTab('ledger')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition ${
               activeTab === 'ledger'
-                ? 'bg-indigo-600/80 text-white font-bold shadow'
+                ? 'bg-blue-600/80 text-white font-bold shadow'
                 : 'text-white/60 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -239,7 +239,7 @@ export default function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md">
-            <RefreshCw className="w-8 h-8 text-indigo-400 animate-spin mb-3.5" />
+            <RefreshCw className="w-8 h-8 text-blue-400 animate-spin mb-3.5" />
             <span className="text-sm font-semibold tracking-wide text-white">Retrieving Persistent Ledger Records...</span>
             <p className="text-[11px] text-white/40 mt-1">Connecting to back-end SQLite database engine</p>
           </div>

@@ -155,15 +155,15 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
 
         {/* Average Daily Spending vs 20K Target */}
         <div id="avg-daily-spending-card" className="bg-white/10 backdrop-blur-lg border border-white/10 p-5 rounded-3xl relative overflow-hidden group shadow-lg">
-          <div className={`absolute right-0 top-0 translate-x-3 -translate-y-3 w-28 h-28 ${avgDailySpending > settings.dailySpendingLimit ? 'bg-amber-500/10' : 'bg-indigo-500/10'} rounded-full blur-xl transition-all`} />
+          <div className={`absolute right-0 top-0 translate-x-3 -translate-y-3 w-28 h-28 ${avgDailySpending > settings.dailySpendingLimit ? 'bg-amber-500/10' : 'bg-blue-500/10'} rounded-full blur-xl transition-all`} />
           <div className="flex items-center justify-between mb-3">
             <span className="text-white/60 text-xs font-semibold uppercase tracking-wider">Daily Est. Spending</span>
-            <div className={`p-2 rounded-xl ${avgDailySpending > settings.dailySpendingLimit ? 'bg-amber-500/20 text-amber-300' : 'bg-indigo-500/20 text-indigo-200'}`}>
+            <div className={`p-2 rounded-xl ${avgDailySpending > settings.dailySpendingLimit ? 'bg-amber-500/20 text-amber-300' : 'bg-blue-500/20 text-blue-200'}`}>
               <Wallet className="w-5 h-5" />
             </div>
           </div>
           <div className="space-y-1 animate-fade-in">
-            <h3 className={`text-2xl font-bold font-mono ${avgDailySpending > settings.dailySpendingLimit ? 'text-amber-300' : 'text-indigo-200'}`}>
+            <h3 className={`text-2xl font-bold font-mono ${avgDailySpending > settings.dailySpendingLimit ? 'text-amber-300' : 'text-blue-200'}`}>
               {formatRwf(avgDailySpending)}
             </h3>
             <div className="flex items-center justify-between gap-1">
@@ -265,7 +265,7 @@ export const BudgetSummary: React.FC<BudgetSummaryProps> = ({
               <div className="w-full bg-white/10 h-2.5 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
-                    avgDailySpending > settings.dailySpendingLimit ? 'bg-rose-500' : 'bg-indigo-500'
+                    avgDailySpending > settings.dailySpendingLimit ? 'bg-rose-500' : 'bg-blue-500'
                   }`}
                   style={{ width: `${Math.min(100, (avgDailySpending / settings.dailySpendingLimit) * 100)}%` }}
                 />

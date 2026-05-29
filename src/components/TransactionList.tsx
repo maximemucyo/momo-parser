@@ -102,8 +102,8 @@ export const TransactionList: React.FC<TransactionListProps> = ({
     <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 animate-fade-in">
       {/* Category Mapper Manager */}
       <div id="category-mapping-manager" className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl xl:col-span-1">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-200 mb-2.5 flex items-center gap-2">
-          <RefreshCw className="w-4 h-4 text-indigo-300" />
+        <h3 className="text-sm font-bold uppercase tracking-wider text-blue-200 mb-2.5 flex items-center gap-2">
+          <RefreshCw className="w-4 h-4 text-blue-300" />
           Smart Rule Customizer
         </h3>
         <p className="text-xs text-white/60 leading-relaxed mb-4">
@@ -125,7 +125,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
               type="text"
               required
               placeholder="e.g. SP LTD, Isabelle"
-              className="w-full bg-black/35 border border-white/10 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-505 placeholder:text-white/20"
+              className="w-full bg-black/35 border border-white/10 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-white/20"
               value={mappingKw}
               onChange={e => setMappingKw(e.target.value)}
             />
@@ -134,7 +134,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
           <div>
             <label className="text-white/50 text-[10px] font-bold block mb-1">Budget Category</label>
             <select
-              className="w-full bg-black/35 border border-white/10 rounded-xl px-2.5 py-2 text-xs text-indigo-205 focus:outline-none focus:ring-1 focus:ring-indigo-505"
+              className="w-full bg-black/35 border border-white/10 rounded-xl px-2.5 py-2 text-xs text-blue-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
               value={mappingCat}
               onChange={e => setMappingCat(e.target.value)}
             >
@@ -146,7 +146,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
 
           <button
             type="submit"
-            className="w-full bg-indigo-600/20 hover:bg-indigo-600/35 border border-indigo-500/30 text-indigo-200 font-bold py-2 px-3 rounded-full text-xs transition-all duration-250 cursor-pointer shadow-md"
+            className="w-full bg-blue-600/20 hover:bg-blue-600/35 border border-blue-500/30 text-blue-200 font-bold py-2 px-3 rounded-full text-xs transition-all duration-250 cursor-pointer shadow-md"
           >
             Add Automation Rule
           </button>
@@ -162,7 +162,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
               Object.entries(settings.customCategoryMappings).map(([kw, cat], idx) => (
                 <div key={idx} className="flex items-center justify-between text-[11px] bg-black/25 border border-white/5 px-2.5 py-2 rounded-xl">
                   <span className="font-mono text-white/90 font-semibold">{kw}</span>
-                  <span className="text-indigo-200 font-medium">{cat}</span>
+                  <span className="text-blue-200 font-medium">{cat}</span>
                 </div>
               ))
             )}
@@ -174,7 +174,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
       <div id="momo-transactions-data-panel" className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl xl:col-span-3 flex flex-col">
         {/* Filters Top Bar */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 mb-4">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-200">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-blue-200">
             Parsed Mobile Money History ({filteredTxs.length})
           </h3>
 
@@ -184,7 +184,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
               <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-white/45" />
               <input
                 type="text"
-                className="bg-black/35 border border-white/10 text-white rounded-xl text-xs pl-9 pr-3 py-1.5 w-40 focus:outline-none focus:ring-1 focus:ring-indigo-400 placeholder:text-white/30"
+                className="bg-black/35 border border-white/10 text-white rounded-xl text-xs pl-9 pr-3 py-1.5 w-40 focus:outline-none focus:ring-1 focus:ring-blue-400 placeholder:text-white/30"
                 placeholder="Search phone/firm..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -314,7 +314,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                             </td>
                             <td className="py-3">
                               <select
-                                className="bg-black/40 border border-white/10 text-[11px] text-indigo-200 rounded-lg px-2 py-1 focus:outline-none cursor-pointer hover:bg-black/50 transition"
+                                className="bg-black/40 border border-white/10 text-[11px] text-blue-200 rounded-lg px-2 py-1 focus:outline-none cursor-pointer hover:bg-black/50 transition"
                                 value={tx.category}
                                 onChange={e => onUpdateTransactionCategory(tx.id, e.target.value)}
                               >
@@ -349,7 +349,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                             <tr>
                               <td colSpan={8} className="bg-black/35 p-4 rounded-3xl border border-white/10">
                                 <div className="space-y-2.5 text-xs">
-                                  <span className="font-bold text-indigo-200 block">Raw SMS Message Text:</span>
+                                  <span className="font-bold text-blue-200 block">Raw SMS Message Text:</span>
                                   <p className="font-mono text-[11px] break-all leading-relaxed text-white/80 bg-black/40 p-3 rounded-2xl border border-white/5 select-all">
                                     {tx.rawText}
                                   </p>
@@ -378,7 +378,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                     return (
                       <tfoot className="border-t border-white/25 bg-black/40 font-bold text-[10px] uppercase">
                         <tr className="border-t border-white/10">
-                          <td className="py-3.5 pl-2 text-indigo-200 font-extrabold">TOTALS ({filteredTxs.length})</td>
+                          <td className="py-3.5 pl-2 text-blue-200 font-extrabold font-sans">TOTALS ({filteredTxs.length})</td>
                           <td className="py-3.5"></td>
                           <td className="py-3.5 text-white/40 font-normal normal-case italic">Filtered net budget change:</td>
                           <td className="py-3.5 text-center font-mono text-white text-[11px] font-bold">
@@ -460,7 +460,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                       <div className="flex items-center justify-between pt-1">
                         <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider">Category Map:</span>
                         <select
-                          className="bg-black/45 border border-white/10 text-xs text-indigo-200 rounded-xl px-2.5 py-1.5 focus:outline-none cursor-pointer w-[140px]"
+                          className="bg-black/45 border border-white/10 text-xs text-blue-200 rounded-xl px-2.5 py-1.5 focus:outline-none cursor-pointer w-[140px]"
                           value={tx.category}
                           onChange={e => onUpdateTransactionCategory(tx.id, e.target.value)}
                         >
@@ -473,7 +473,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                       {/* Expanded Raw Area */}
                       {isExpand && (
                         <div className="bg-black/50 p-3 rounded-xl border border-white/5 text-[10px] space-y-2 mt-2">
-                          <span className="font-bold text-indigo-200 block">Raw SMS Message Text:</span>
+                          <span className="font-bold text-blue-200 block">Raw SMS Message Text:</span>
                           <p className="font-mono break-all leading-normal text-white/80 bg-black/60 p-2.5 rounded-lg select-all">
                             {tx.rawText}
                           </p>
@@ -497,8 +497,8 @@ export const TransactionList: React.FC<TransactionListProps> = ({
                   }, 0);
 
                   return (
-                    <div className="bg-gradient-to-br from-indigo-950/30 to-black/50 border border-white/20 p-4 rounded-2xl space-y-2.5 uppercase text-[9px] font-semibold">
-                      <div className="text-indigo-200 font-extrabold text-xs tracking-wider mb-1">TOTALS ({filteredTxs.length})</div>
+                    <div className="bg-gradient-to-br from-blue-950/30 to-black/50 border border-white/20 p-4 rounded-2xl space-y-2.5 uppercase text-[9px] font-semibold">
+                      <div className="text-blue-200 font-extrabold text-xs tracking-wider mb-1">TOTALS ({filteredTxs.length})</div>
                       <div className="flex justify-between items-center text-white/60">
                         <span>Total Base:</span>
                         <strong className="text-white font-bold font-mono text-[10px]">{formatRwf(totalBase)}</strong>

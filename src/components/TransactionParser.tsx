@@ -129,7 +129,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
           onClick={() => setActiveTab('paste')}
           className={`flex-1 py-3.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
             activeTab === 'paste'
-              ? 'text-white bg-[#121c2e]/10 border-b-2 border-indigo-400'
+              ? 'text-white bg-[#121c2e]/10 border-b-2 border-blue-400'
               : 'text-white/45 hover:text-white hover:bg-white/5'
           }`}
         >
@@ -139,7 +139,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
           onClick={() => setActiveTab('manual')}
           className={`flex-1 py-3.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
             activeTab === 'manual'
-              ? 'text-white bg-[#121c2e]/10 border-b-2 border-indigo-400'
+              ? 'text-white bg-[#121c2e]/10 border-b-2 border-blue-400'
               : 'text-white/45 hover:text-white hover:bg-white/5'
           }`}
         >
@@ -165,20 +165,20 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
         {activeTab === 'paste' ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-white/70 text-xs font-bold block">
+              <label className="text-white/70 text-xs font-bold block bg-transparent">
                 Line-by-Line SMS Statements
               </label>
               <button
                 type="button"
                 onClick={loadSampleMomoMessage}
-                className="text-[11px] font-bold text-indigo-300 hover:text-indigo-200 hover:underline flex items-center gap-1 cursor-pointer transition"
+                className="text-[11px] font-bold text-blue-300 hover:text-blue-200 hover:underline flex items-center gap-1 cursor-pointer transition"
               >
                 + Grab sample msg
               </button>
             </div>
 
             <textarea
-              className="w-full h-32 bg-black/35 border border-white/10 rounded-2xl p-3.5 text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-indigo-505 resize-none custom-scrollbar"
+              className="w-full h-32 bg-black/35 border border-white/10 rounded-2xl p-3.5 text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none custom-scrollbar"
               placeholder="Paste raw MTN Mobile Money statements here. You can paste multiple messages together, the engine handles bulk extraction automatically..."
               value={inputText}
               onChange={e => setInputText(e.target.value)}
@@ -191,7 +191,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
               <button
                 onClick={handleBulkParse}
                 disabled={!inputText.trim()}
-                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-45 disabled:hover:bg-indigo-650 text-white font-bold px-4 py-2 rounded-full text-xs flex items-center gap-2 cursor-pointer transition shadow-md self-end"
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-45 disabled:hover:bg-blue-600 text-white font-bold px-4 py-2 rounded-full text-xs flex items-center gap-2 cursor-pointer transition shadow-md self-end"
               >
                 <Clipboard className="w-3.5 h-3.5" />
                 Parse Statements
@@ -207,7 +207,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
                   type="text"
                   required
                   placeholder="e.g. Simba Supermarket, Isabelle"
-                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-505 placeholder:text-white/20"
+                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-white/20"
                   value={mCP}
                   onChange={e => setMCP(e.target.value)}
                 />
@@ -216,7 +216,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
               <div>
                 <label className="text-white/55 text-xs font-bold block mb-1">Transaction Type</label>
                 <select
-                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-indigo-200 focus:outline-none focus:ring-1 focus:ring-indigo-505"
+                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-blue-200 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   value={mType}
                   onChange={e => setMType(e.target.value as any)}
                 >
@@ -232,8 +232,10 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
                 <input
                   type="number"
                   required
+                  step="any"
+                  inputMode="decimal"
                   placeholder="e.g. 5000"
-                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-indigo-505 placeholder:text-white/20"
+                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-white/20"
                   value={mAmount}
                   onChange={e => setMAmount(e.target.value)}
                 />
@@ -243,8 +245,10 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
                 <label className="text-white/55 text-xs font-bold block mb-1">Momo Fee (RWF)</label>
                 <input
                   type="number"
+                  step="any"
+                  inputMode="decimal"
                   placeholder="e.g. 100"
-                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-indigo-505 placeholder:text-white/20"
+                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-white/20"
                   value={mFee}
                   onChange={e => setMFee(e.target.value)}
                 />
@@ -254,7 +258,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
                 <label className="text-white/55 text-xs font-bold block mb-1">Post Date</label>
                 <input
                   type="date"
-                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-505"
+                  className="w-full bg-black/35 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                   value={mDate}
                   onChange={e => setMDate(e.target.value)}
                 />
@@ -264,7 +268,7 @@ export const TransactionParser: React.FC<TransactionParserProps> = ({
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-full text-xs flex items-center gap-1.5 transition shadow-lg cursor-pointer animate-pulse-subtle"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-full text-xs flex items-center gap-1.5 transition shadow-lg cursor-pointer animate-pulse-subtle"
               >
                 <Plus className="w-4 h-4" />
                 Add Record

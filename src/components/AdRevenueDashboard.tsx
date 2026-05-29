@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AdRevenueRecord, AppSettings } from '../types';
-import { Landmark, Calendar, DollarSign, Cloud, Percent, ChevronRight, HelpCircle, Send, Save, Trash2 } from 'lucide-react';
+import { Landmark, Calendar, DollarSign, Cloud, Percent, ChevronRight, HelpCircle, Send, Save, Trash2, Pencil, X } from 'lucide-react';
 
 interface AdRevenueDashboardProps {
   revenueRecords: AdRevenueRecord[];
@@ -23,6 +23,7 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
   const [adCosts, setAdCosts] = useState('0.0');
 
   const [dateTarget, setDateTarget] = useState<'today' | 'yesterday' | 'custom'>('today');
+  const [editingDate, setEditingDate] = useState<string | null>(null);
 
   const getTargetDate = (target: 'today' | 'yesterday' | 'custom'): string => {
     const d = new Date();
@@ -40,6 +41,46 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
     setDateTarget(target);
     const resolvedDate = getTargetDate(target);
     setDate(resolvedDate);
+  };
+
+  const handleEditClick = (rec: AdRevenueRecord) => {
+    setEditingDate(rec.date);
+    setDate(rec.date);
+    
+    const dToday = new Date().toISOString().substring(0, 10);
+    const dYesterday = new Date();
+    dYesterday.setDate(dYesterday.getDate() - 1);
+    const dYesterdayStr = dYesterday.toISOString().substring(0, 10);
+    
+    if (rec.date === dToday) {
+      setDateTarget('today');
+    } else if (rec.date === dYesterdayStr) {
+      setDateTarget('yesterday');
+    } else {
+      setDateTarget('custom');
+    }
+
+    setMonetag(rec.monetag.toString());
+    setAdsterra(rec.adsterra.toString());
+    setProfiton(rec.profiton.toString());
+    setServerCosts(rec.serverCosts.toString());
+    setAdCosts(rec.adCosts.toString());
+    
+    const formEl = document.getElementById('ad-logger-form');
+    if (formEl) {
+      formEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingDate(null);
+    setMonetag('');
+    setAdsterra('');
+    setProfiton('');
+    setServerCosts('1.5');
+    setAdCosts('0.0');
+    setDateTarget('today');
+    setDate(new Date().toISOString().substring(0, 10));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -68,6 +109,7 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
     setMonetag('');
     setAdsterra('');
     setProfiton('');
+    setEditingDate(null);
   };
 
   const formatRwf = (val: number) => {
@@ -83,40 +125,62 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
       {/* Logger Panel */}
       <div id="ad-logger-form" className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl xl:col-span-1 flex flex-col justify-between">
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-200 mb-4 flex items-center gap-2">
-            <Landmark className="w-4 h-4 text-indigo-300" />
-            Log Daily Monetization
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-blue-200 flex items-center gap-2">
+              <Landmark className="w-4 h-4 text-blue-300" />
+              {editingDate ? 'Update Daily Log' : 'Log Daily Monetization'}
+            </h3>
+            {editingDate && (
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="text-[10px] text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 px-2 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition"
+                title="Cancel modifications"
+              >
+                <X className="w-3 h-3" />
+                Cancel Edit
+              </button>
+            )}
+          </div>
+
+          {editingDate && (
+            <div className="mb-3.5 p-3 bg-blue-500/10 border border-blue-500/20 text-blue-200 rounded-2xl text-xs leading-normal">
+              Adjusting values for logged date <strong className="text-white font-mono">{editingDate}</strong>. Submitting will rewrite logs.
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Quick Date Toggle */}
             <div>
-              <span className="text-white/60 text-xs font-bold block mb-1.5">Reporting Date</span>
+              <span className="text-white/60 text-xs font-bold block mb-1.5 font-sans">Reporting Date</span>
               <div className="grid grid-cols-3 gap-1 bg-black/30 p-1 rounded-xl border border-white/10 text-xs text-center font-medium">
                 <button
                   type="button"
                   onClick={() => handleQuickDateTap('today')}
+                  disabled={!!editingDate}
                   className={`py-1.5 rounded-lg cursor-pointer transition ${
-                    dateTarget === 'today' ? 'bg-indigo-600/80 text-white font-bold' : 'text-white/50 hover:text-white/80'
-                  }`}
+                    dateTarget === 'today' ? 'bg-blue-600/80 text-white font-bold' : 'text-white/50 hover:text-white/80'
+                  } disabled:opacity-55 disabled:cursor-not-allowed`}
                 >
                   Today
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickDateTap('yesterday')}
+                  disabled={!!editingDate}
                   className={`py-1.5 rounded-lg cursor-pointer transition ${
-                    dateTarget === 'yesterday' ? 'bg-indigo-600/80 text-white font-bold' : 'text-white/50 hover:text-white/80'
-                  }`}
+                    dateTarget === 'yesterday' ? 'bg-blue-600/80 text-white font-bold' : 'text-white/50 hover:text-white/80'
+                  } disabled:opacity-55 disabled:cursor-not-allowed`}
                 >
                   Yesterday
                 </button>
                 <button
                   type="button"
                   onClick={() => handleQuickDateTap('custom')}
+                  disabled={!!editingDate}
                   className={`py-1.5 rounded-lg cursor-pointer transition ${
-                    dateTarget === 'custom' ? 'bg-indigo-600/80 text-white font-bold' : 'text-white/50 hover:text-white/80'
-                  }`}
+                    dateTarget === 'custom' ? 'bg-blue-600/80 text-white font-bold' : 'text-white/50 hover:text-white/80'
+                  } disabled:opacity-55 disabled:cursor-not-allowed`}
                 >
                   Calendar
                 </button>
@@ -126,19 +190,20 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                 <input
                   type="date"
                   required
-                  className="w-full mt-2 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  disabled={!!editingDate}
+                  className="w-full mt-2 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
                   value={date}
                   onChange={e => setDate(e.target.value)}
                 />
               )}
               <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wide">
-                Selected Date: <span className="text-indigo-200 font-mono font-bold">{getTargetDate(dateTarget)}</span>
+                Selected Date: <span className="text-blue-200 font-mono font-bold">{getTargetDate(dateTarget)}</span>
               </p>
             </div>
 
             <div className="space-y-3">
-              <span className="text-white/70 text-xs font-semibold block border-b border-white/15 pb-1 flex items-center gap-1">
-                <DollarSign className="w-3.5 h-3.5 text-indigo-300" />
+              <span className="text-white/70 text-xs font-semibold block border-b border-white/15 pb-1 flex items-center gap-1 font-sans">
+                <DollarSign className="w-3.5 h-3.5 text-blue-300" />
                 Ad Network Earning (USD)
               </span>
 
@@ -147,9 +212,10 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                   <label className="text-white/50 text-[10px] font-bold block mb-1">Monetag</label>
                   <input
                     type="number"
-                    step="0.01"
+                    step="any"
+                    inputMode="decimal"
                     placeholder="0.00"
-                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 placeholder:text-white/20"
+                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-white/20"
                     value={monetag}
                     onChange={e => setMonetag(e.target.value)}
                   />
@@ -158,9 +224,10 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                   <label className="text-white/50 text-[10px] font-bold block mb-1">Adsterra</label>
                   <input
                     type="number"
-                    step="0.01"
+                    step="any"
+                    inputMode="decimal"
                     placeholder="0.00"
-                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 placeholder:text-white/20"
+                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-white/20"
                     value={adsterra}
                     onChange={e => setAdsterra(e.target.value)}
                   />
@@ -169,9 +236,10 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                   <label className="text-white/50 text-[10px] font-bold block mb-1">Profiton</label>
                   <input
                     type="number"
-                    step="0.01"
+                    step="any"
+                    inputMode="decimal"
                     placeholder="0.00"
-                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 placeholder:text-white/20"
+                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 placeholder:text-white/20"
                     value={profiton}
                     onChange={e => setProfiton(e.target.value)}
                   />
@@ -180,8 +248,8 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
             </div>
 
             <div className="space-y-3 pt-1">
-              <span className="text-white/70 text-xs font-semibold block border-b border-white/15 pb-1 flex items-center gap-1">
-                <Cloud className="w-3.5 h-3.5 text-indigo-300" />
+              <span className="text-white/70 text-xs font-semibold block border-b border-white/15 pb-1 flex items-center gap-1 font-sans">
+                <Cloud className="w-3.5 h-3.5 text-blue-300" />
                 Fixed Cost Deductions (USD)
               </span>
 
@@ -190,8 +258,9 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                   <label className="text-white/50 text-[10px] font-bold block mb-1">Server Costs</label>
                   <input
                     type="number"
-                    step="0.01"
-                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400"
+                    step="any"
+                    inputMode="decimal"
+                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
                     value={serverCosts}
                     onChange={e => setServerCosts(e.target.value)}
                   />
@@ -200,8 +269,9 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                   <label className="text-white/50 text-[10px] font-bold block mb-1">Ad Campaigns</label>
                   <input
                     type="number"
-                    step="0.01"
-                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400"
+                    step="any"
+                    inputMode="decimal"
+                    className="w-full bg-black/35 border border-white/10 rounded-xl px-2 py-2 text-xs text-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400"
                     value={adCosts}
                     onChange={e => setAdCosts(e.target.value)}
                   />
@@ -214,17 +284,17 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-3 rounded-full text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-indigo-650/20 transition-all duration-200 hover:-translate-y-0.5"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-3 rounded-full text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-blue-900/20 transition-all duration-200 hover:-translate-y-0.5"
             >
               <Save className="w-4 h-4" />
-              Commit Revenue
+              {editingDate ? 'Update Ledger Record' : 'Commit Revenue'}
             </button>
           </form>
         </div>
 
         <div className="mt-4 p-3.5 bg-white/5 border border-white/10 rounded-2xl">
-          <h4 className="text-[11px] font-bold text-indigo-200 uppercase tracking-wide flex items-center gap-1 mb-1">
-            <HelpCircle className="w-3.5 h-3.5 text-indigo-300" />
+          <h4 className="text-[11px] font-bold text-blue-200 uppercase tracking-wide flex items-center gap-1 mb-1">
+            <HelpCircle className="w-3.5 h-3.5 text-blue-300" />
             9:00 AM Kigali Cutoff
           </h4>
           <p className="text-[10px] leading-relaxed text-white/60">
@@ -235,7 +305,7 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
 
       {/* Revenue list table */}
       <div id="revenue-history-table" className="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl xl:col-span-2 flex flex-col">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-200 mb-4">
+        <h3 className="text-sm font-bold uppercase tracking-wider text-blue-200 mb-4">
           Ad Revenue Logs (Converted to RWF at {settings.usdToRwfRate}/$)
         </h3>
 
@@ -288,13 +358,22 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                               {formatRwf(netRwf)}
                             </td>
                             <td className="py-3 text-right">
-                              <button
-                                onClick={() => onDeleteRecord(rec.date)}
-                                className="p-1 px-2 text-rose-400 hover:text-rose-350 hover:bg-rose-500/10 rounded transition mr-2 opacity-0 group-hover:opacity-100 cursor-pointer"
-                                title="Delete revenue record"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                              <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition">
+                                <button
+                                  onClick={() => handleEditClick(rec)}
+                                  className="p-1 px-2 text-blue-400 hover:text-blue-350 hover:bg-blue-500/10 rounded transition cursor-pointer"
+                                  title="Edit revenue data"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => onDeleteRecord(rec.date)}
+                                  className="p-1 px-2 text-rose-400 hover:text-rose-350 hover:bg-rose-500/10 rounded transition mr-2 cursor-pointer"
+                                  title="Delete revenue record"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -314,7 +393,7 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                     return (
                       <tfoot className="border-t border-white/25 bg-black/40 font-bold text-[10px] uppercase">
                         <tr>
-                          <td className="py-3.5 pl-2 text-indigo-200 font-extrabold">TOTALS ({revenueRecords.length})</td>
+                          <td className="py-3.5 pl-2 text-blue-200 font-extrabold">TOTALS ({revenueRecords.length})</td>
                           <td className="py-3.5 text-center font-mono">
                             <span className="text-orange-300 font-bold" title="Monetag Sum">{formatUsd(totalMonetag)}</span> +{' '}
                             <span className="text-cyan-300 font-bold" title="Adsterra Sum">{formatUsd(totalAdsterra)}</span> +{' '}
@@ -352,13 +431,22 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                         {/* Top: Date & Action */}
                         <div className="flex items-center justify-between border-b border-white/5 pb-2">
                           <span className="font-bold font-mono text-xs text-white/90">{rec.date}</span>
-                          <button
-                            onClick={() => onDeleteRecord(rec.date)}
-                            className="p-1.5 text-rose-400 hover:text-rose-350 hover:bg-rose-500/10 rounded transition cursor-pointer"
-                            title="Delete ad revenue record"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleEditClick(rec)}
+                              className="p-1.5 text-blue-400 hover:text-blue-350 hover:bg-blue-500/10 rounded transition cursor-pointer"
+                              title="Edit revenue data"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => onDeleteRecord(rec.date)}
+                              className="p-1.5 text-rose-400 hover:text-rose-350 hover:bg-rose-500/10 rounded transition cursor-pointer"
+                              title="Delete ad revenue record"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
 
                         {/* Breakdown block */}
@@ -405,8 +493,8 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                   const totalNetRWF = totalNetUSD * settings.usdToRwfRate;
 
                   return (
-                    <div className="bg-gradient-to-br from-indigo-950/30 to-black/50 border border-white/20 p-4 rounded-2xl space-y-2.5 uppercase text-[9px] font-semibold">
-                      <div className="text-indigo-200 font-extrabold text-xs tracking-wider mb-1">TOTALS ({revenueRecords.length})</div>
+                    <div className="bg-gradient-to-br from-blue-950/30 to-black/50 border border-white/20 p-4 rounded-2xl space-y-2.5 uppercase text-[9px] font-semibold">
+                      <div className="text-blue-200 font-extrabold text-xs tracking-wider mb-1">TOTALS ({revenueRecords.length})</div>
                       <div className="flex justify-between items-center text-white/60">
                         <span>Total Monetag:</span>
                         <strong className="text-orange-300 font-bold font-mono text-[10px]">{formatUsd(totalMonetag)}</strong>
