@@ -183,6 +183,7 @@ async function startServer() {
   app.use("/api/transactions", requireAuth);
   app.use("/api/ad-revenue", requireAuth);
   app.use("/api/reset", requireAuth);
+  app.use("/api/sync", requireAuth);
 
   // --- SETTINGS APIS ---
   app.get("/api/settings", async (req, res) => {
@@ -340,6 +341,71 @@ async function startServer() {
     try {
       await dbRun("DELETE FROM ad_revenue WHERE date = ?", [req.params.date]);
       res.json({ status: "success" });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // --- SYNC API FOR OFFLINE SYNC ---
+  app.post("/api/sync/all", async (req, res) => {
+    try {
+      const { transactions: clientTxs, ad_revenue: clientRevenues, settings: clientSettings } = req.body;
+      
+      // 1. Overwrite settings
+      if (clientSettings) {
+        const { usdToRwfRate, dailySpendingLimit, customCategoryMappings } = clientSettings;
+        await dbRun(
+          `INSERT OR REPLACE INTO settings (id, usdToRwfRate, dailySpendingLimit, customCategoryMappings)
+           VALUES (1, ?, ?, ?)`,
+          [usdToRwfRate, dailySpendingLimit, JSON.stringify(customCategoryMappings)]
+        );
+      }
+      
+      // 2. Overwrite transactions completely (safest way to sync offline deletions/updates)
+      if (Array.isArray(clientTxs)) {
+        await dbRun("DELETE FROM transactions");
+        for (const tx of clientTxs) {
+          await dbRun(
+            `INSERT OR REPLACE INTO transactions (id, rawText, type, amount, fee, balance, counterparty, timestamp, formattedDate, category, isCustom)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              tx.id,
+              tx.rawText,
+              tx.type,
+              tx.amount,
+              tx.fee,
+              tx.balance,
+              tx.counterparty,
+              tx.timestamp,
+              tx.formattedDate,
+              tx.category,
+              tx.isCustom ? 1 : 0,
+            ]
+          );
+        }
+      }
+      
+      // 3. Overwrite ad_revenue completely
+      if (Array.isArray(clientRevenues)) {
+        await dbRun("DELETE FROM ad_revenue");
+        for (const r of clientRevenues) {
+          await dbRun(
+            `INSERT OR REPLACE INTO ad_revenue (date, monetag, adsterra, profiton, serverCosts, adCosts, checkedAt)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              r.date,
+              r.monetag,
+              r.adsterra,
+              r.profiton,
+              r.serverCosts,
+              r.adCosts,
+              r.checkedAt || new Date().toISOString(),
+            ]
+          );
+        }
+      }
+      
+      res.json({ status: "success", msg: "State synchronized successfully with SQLite" });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

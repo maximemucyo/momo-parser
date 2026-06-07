@@ -14,84 +14,85 @@ body {
   min-height: 100vh;
 }
 
+html.light,
 body.light {
-  background: radial-gradient(circle at top left, #f8fafc, #f1f5f9, #cbd5e1);
+  background: radial-gradient(circle at top left, #f8fafc, #f1f5f9, #cbd5e1) !important;
   background-attachment: fixed;
-  color: #0f172a;
-}
-
-/* Base modifications for light mode */
-body.light .text-white {
   color: #0f172a !important;
 }
 
-body.light .text-white\/95,
-body.light .text-white\/90,
-body.light .text-white\/85,
-body.light .text-white\/80 {
+/* Base modifications for light mode */
+.light .text-white {
+  color: #0f172a !important;
+}
+
+.light .text-white\/95,
+.light .text-white\/90,
+.light .text-white\/85,
+.light .text-white\/80 {
   color: #1e293b !important;
 }
 
-body.light .text-white\/75,
-body.light .text-white\/70,
-body.light .text-white\/65,
-body.light .text-white\/60,
-body.light .text-white\/55,
-body.light .text-white\/50 {
+.light .text-white\/75,
+.light .text-white\/70,
+.light .text-white\/65,
+.light .text-white\/60,
+.light .text-white\/55,
+.light .text-white\/50 {
   color: #475569 !important;
 }
 
-body.light .text-white\/45,
-body.light .text-white\/40,
-body.light .text-white\/35,
-body.light .text-white\/30,
-body.light .text-white\/20,
-body.light .text-white\/25,
-body.light .text-white\/15,
-body.light .text-white\/10 {
+.light .text-white\/45,
+.light .text-white\/40,
+.light .text-white\/35,
+.light .text-white\/30,
+.light .text-white\/20,
+.light .text-white\/25,
+.light .text-white\/15,
+.light .text-white\/10 {
   color: #64748b !important;
 }
 
-body.light .text-emerald-100,
-body.light .text-emerald-200,
-body.light .text-emerald-300 {
+.light .text-emerald-100,
+.light .text-emerald-200,
+.light .text-emerald-300 {
   color: #065f46 !important;
 }
 
-body.light .text-red-100,
-body.light .text-red-200,
-body.light .text-red-300 {
+.light .text-red-100,
+.light .text-red-200,
+.light .text-red-300 {
   color: #991b1b !important;
 }
 
-body.light .text-rose-100,
-body.light .text-rose-200,
-body.light .text-rose-300 {
+.light .text-rose-100,
+.light .text-rose-200,
+.light .text-rose-300 {
   color: #9f1239 !important;
 }
 
-body.light .text-blue-100,
-body.light .text-blue-200,
-body.light .text-blue-300 {
+.light .text-blue-100,
+.light .text-blue-200,
+.light .text-blue-300 {
   color: #1e40af !important;
 }
 
-body.light select,
-body.light option,
-body.light textarea,
-body.light input {
+.light select,
+.light option,
+.light textarea,
+.light input {
   background-color: #ffffff !important;
   border-color: rgba(15, 23, 42, 0.15) !important;
   color: #0f172a !important;
 }
 
-body.light select option {
+.light select option {
   background-color: #ffffff !important;
   color: #0f172a !important;
 }
 
 /* Glass card overrides */
-body.light .bg-white\/10 {
+.light .bg-white\/10 {
   background-color: rgba(255, 255, 255, 0.75) !important;
   border-color: rgba(15, 23, 42, 0.08) !important;
   color: #0f172a !important;
@@ -99,117 +100,117 @@ body.light .bg-white\/10 {
   backdrop-filter: blur(12px) !important;
 }
 
-body.light .bg-white\/5,
-body.light header.bg-white\/5 {
+.light .bg-white\/5,
+.light header.bg-white\/5 {
   background-color: rgba(255, 255, 255, 0.6) !important;
   border-color: rgba(15, 23, 42, 0.08) !important;
   color: #0f172a !important;
 }
 
-body.light .border-white\/10,
-body.light .border-white\/5 {
+.light .border-white\/10,
+.light .border-white\/5 {
   border-color: rgba(15, 23, 42, 0.12) !important;
 }
 
 /* Secondary overlays */
-body.light .bg-black\/35,
-body.light .bg-black\/30,
-body.light .bg-black\/25,
-body.light .bg-black\/20,
-body.light .bg-black\/15 {
+.light .bg-black\/35,
+.light .bg-black\/30,
+.light .bg-black\/25,
+.light .bg-black\/20,
+.light .bg-black\/15 {
   background-color: rgba(255, 255, 255, 0.95) !important;
   border-color: rgba(15, 23, 42, 0.08) !important;
   color: #0f172a !important;
 }
 
 /* Badges / alerts alignment */
-body.light .bg-blue-600\/10,
-body.light .bg-blue-500\/10 {
+.light .bg-blue-600\/10,
+.light .bg-blue-500\/10 {
   background-color: rgba(37, 99, 235, 0.08) !important;
   border-color: rgba(37, 99, 235, 0.15) !important;
 }
 
-body.light .bg-rose-600\/10,
-body.light .bg-rose-500\/10 {
+.light .bg-rose-600\/10,
+.light .bg-rose-500\/10 {
   background-color: rgba(244, 63, 94, 0.08) !important;
   border-color: rgba(244, 63, 94, 0.15) !important;
 }
 
-body.light .bg-emerald-600\/10,
-body.light .bg-emerald-500\/10 {
+.light .bg-emerald-600\/10,
+.light .bg-emerald-500\/10 {
   background-color: rgba(16, 185, 129, 0.08) !important;
   border-color: rgba(16, 185, 129, 0.15) !important;
 }
 
-body.light .text-blue-200 {
+.light .text-blue-200 {
   color: #1240c0 !important;
 }
-body.light .text-blue-300 {
+.light .text-blue-300 {
   color: #1e3a8a !important;
 }
-body.light .text-emerald-300 {
+.light .text-emerald-300 {
   color: #047857 !important;
 }
-body.light .text-rose-300 {
+.light .text-rose-300 {
   color: #b91c1c !important;
 }
-body.light .text-amber-300 {
+.light .text-amber-300 {
   color: #b45309 !important;
 }
 
-body.light .bg-amber-500\/20 {
+.light .bg-amber-500\/20 {
   background-color: rgba(245, 158, 11, 0.15) !important;
   color: #b45309 !important;
 }
 
-body.light .bg-blue-500\/20 {
+.light .bg-blue-500\/20 {
   background-color: rgba(59, 130, 246, 0.15) !important;
   color: #1e3a8a !important;
 }
 
-body.light .fill-white\/40 {
+.light .fill-white\/40 {
   fill: #475569 !important;
 }
 
-body.light svg text {
+.light svg text {
   fill: #475569 !important;
 }
 
-body.light line[stroke="rgba(255, 255, 255, 0.1)"] {
+.light line[stroke="rgba(255, 255, 255, 0.1)"] {
   stroke: rgba(15, 23, 42, 0.12) !important;
 }
 
-body.light line[stroke="rgba(255, 255, 255, 0.25)"] {
+.light line[stroke="rgba(255, 255, 255, 0.25)"] {
   stroke: rgba(15, 23, 42, 0.3) !important;
 }
 
-body.light .bg-slate-900\/90 {
+.light .bg-slate-900\/90 {
   background-color: rgba(255, 255, 255, 0.95) !important;
   border-color: rgba(15, 23, 42, 0.15) !important;
   color: #0f172a !important;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
 }
 
-body.light .bg-slate-900\/90 p {
+.light .bg-slate-900\/90 p {
   color: #0f172a !important;
 }
 
-body.light .border-white\/5 {
+.light .border-white\/5 {
   border-color: rgba(15, 23, 42, 0.08) !important;
 }
 
-body.light .text-white\/40 {
+.light .text-white\/40 {
   color: #475569 !important;
 }
 
 /* Interactive focus fixes */
-body.light input {
+.light input {
   background-color: #ffffff !important;
   border-color: rgba(15, 23, 42, 0.15) !important;
   color: #0f172a !important;
 }
 
-body.light input::placeholder {
+.light input::placeholder {
   color: rgba(15, 23, 42, 0.45) !important;
 }
 

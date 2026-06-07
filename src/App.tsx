@@ -20,6 +20,10 @@ export default function App() {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Connectivity states
+  const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
+  const [isSyncing, setIsSyncing] = useState(false);
+
   // Authentication States
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return localStorage.getItem('momo_auth_logged') === 'true' && !!localStorage.getItem('momo_auth_token');
@@ -44,8 +48,10 @@ export default function App() {
   // Synchronize theme to document body class list
   useEffect(() => {
     if (theme === 'light') {
+      document.documentElement.classList.add('light');
       document.body.classList.add('light');
     } else {
+      document.documentElement.classList.remove('light');
       document.body.classList.remove('light');
     }
     localStorage.setItem('momo_theme', theme);
@@ -55,29 +61,37 @@ export default function App() {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  // Daily 7 PM check loop (checks if 7 PM and triggers reminder once per day)
+  // Automated Daily Reminder Logic: Checks if current local hour is >= 19 (7 PM onwards)
+  // Displays reminder dynamically if the user has not yet been notified today
   useEffect(() => {
     if (!reminderActive || notificationPermission !== 'granted') return;
 
-    const interval = setInterval(() => {
+    const checkAndTrigger = () => {
       const now = new Date();
-      if (now.getHours() === 19) { // 7:00 PM - 7:59 PM
+      const currentHour = now.getHours();
+      
+      if (currentHour >= 19) { // 7:00 PM onwards
         const lastRemindedDate = localStorage.getItem('momo_last_reminded');
-        const todayStr = now.toISOString().substring(0, 10);
+        
+        // Use Swedish local date formatting (sv) to get YYYY-MM-DD in local time accurately
+        const todayStr = now.toLocaleDateString('sv');
         if (lastRemindedDate !== todayStr) {
           localStorage.setItem('momo_last_reminded', todayStr);
           try {
+            const reminderText = 'Hey Maxime! It is past 7:00 PM. Time to paste your daily MTN MoMo statements and log website ad yields.';
+            
             if ('serviceWorker' in navigator) {
               navigator.serviceWorker.ready.then((registration) => {
-                registration.showNotification('MomoSpend Reminder', {
-                  body: 'Hey Maxime, it is 7:00 PM! Time to paste your MTN MoMo statements and log your daily website ad yield.',
+                registration.showNotification('MomoSpend Daily Reminder', {
+                  body: reminderText,
                   icon: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=192&h=192&fit=crop',
-                  tag: 'daily-reminder-momo'
+                  tag: 'daily-reminder-momo',
+                  requireInteraction: true
                 });
               });
             } else {
               new Notification('MomoSpend Daily Reminder', {
-                body: 'Hey Maxime, it is 7:00 PM! Time to paste your MTN MoMo statements and log your daily website ad yield.',
+                body: reminderText,
                 icon: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=192&h=192&fit=crop'
               });
             }
@@ -86,7 +100,12 @@ export default function App() {
           }
         }
       }
-    }, 45000); // Check every 45 seconds
+    };
+
+    // run once instantly on mount/activation
+    checkAndTrigger();
+
+    const interval = setInterval(checkAndTrigger, 30000); // check every 30 seconds
 
     return () => clearInterval(interval);
   }, [reminderActive, notificationPermission]);
@@ -103,6 +122,63 @@ export default function App() {
       throw new Error('Unauthorized');
     }
     return response;
+  };
+
+  // Save local mirror backups to device Storage
+  const saveLocalBackup = (
+    txs?: MomoTransaction[],
+    revs?: AdRevenueRecord[],
+    sets?: AppSettings
+  ) => {
+    try {
+      if (txs) localStorage.setItem('momo_local_transactions', JSON.stringify(txs));
+      if (revs) localStorage.setItem('momo_local_ad_revenue', JSON.stringify(revs));
+      if (sets) localStorage.setItem('momo_local_settings', JSON.stringify(sets));
+    } catch (e) {
+      console.warn('Failed to commit local database mirror', e);
+    }
+  };
+
+  // Perform full replication sync of cached states to SQL Server
+  const triggerBackgroundSync = async () => {
+    if (!navigator.onLine) return;
+    const needsSync = localStorage.getItem('momo_needs_sync') === 'true';
+    if (!needsSync) return;
+
+    setIsSyncing(true);
+    try {
+      const txsStr = localStorage.getItem('momo_local_transactions');
+      const revsStr = localStorage.getItem('momo_local_ad_revenue');
+      const setsStr = localStorage.getItem('momo_local_settings');
+
+      if (!txsStr || !revsStr || !setsStr) {
+        setIsSyncing(false);
+        return;
+      }
+
+      const txs = JSON.parse(txsStr);
+      const revs = JSON.parse(revsStr);
+      const sets = JSON.parse(setsStr);
+
+      const res = await apiFetch('/api/sync/all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transactions: txs,
+          ad_revenue: revs,
+          settings: sets
+        })
+      });
+
+      if (res.ok) {
+        localStorage.setItem('momo_needs_sync', 'false');
+        console.log('Background Sync: State synchronized successfully with SQLite');
+      }
+    } catch (e) {
+      console.warn('Background Sync: Failed to connect or synchronize with server', e);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const handleLogin = async (e: FormEvent) => {
@@ -162,7 +238,7 @@ export default function App() {
     localStorage.setItem('momo_reminder_active', String(nextState));
   };
 
-  // Load state from SQLite API on mount (re-triggers when isAuthenticated updates)
+  // Load state on mount, supporting instantaneous offline caches
   useEffect(() => {
     if (!isAuthenticated) {
       setIsLoading(false);
@@ -181,10 +257,32 @@ export default function App() {
           setTransactions(resTxs);
           setRevenueRecords(resRevenue);
           setIsLoading(false);
+
+          // Update local replication backups
+          localStorage.setItem('momo_local_settings', JSON.stringify(resSettings));
+          localStorage.setItem('momo_local_transactions', JSON.stringify(resTxs));
+          localStorage.setItem('momo_local_ad_revenue', JSON.stringify(resRevenue));
+          
+          // Trigger sync if there were outstanding offline changes made earlier
+          const needsSync = localStorage.getItem('momo_needs_sync') === 'true';
+          if (needsSync) {
+            setTimeout(() => {
+              triggerBackgroundSync();
+            }, 1000);
+          }
         }
       } catch (err) {
-        console.error('Failed to parse from SQLite database', err);
+        console.warn('SQLite database fetch failed (unreachable/offline). Loading offline-cached mirror replication...', err);
         if (active) {
+          // OFFLINE FALLBACK: Load from local storage values if they exist
+          const cachedSettings = localStorage.getItem('momo_local_settings');
+          const cachedTransactions = localStorage.getItem('momo_local_transactions');
+          const cachedAdRevenue = localStorage.getItem('momo_local_ad_revenue');
+
+          if (cachedSettings) setSettings(JSON.parse(cachedSettings));
+          if (cachedTransactions) setTransactions(JSON.parse(cachedTransactions));
+          if (cachedAdRevenue) setRevenueRecords(JSON.parse(cachedAdRevenue));
+
           setIsLoading(false);
         }
       }
@@ -195,82 +293,140 @@ export default function App() {
     };
   }, [isAuthenticated]);
 
+  // Online connection restoration listener
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+      triggerBackgroundSync();
+    };
+    const handleOffline = () => {
+      setIsOffline(true);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   // Handlers
   const handleAddTransactions = async (newTxs: MomoTransaction[]) => {
-    setTransactions(prev => [...newTxs, ...prev]);
+    setTransactions(prev => {
+      const next = [...newTxs, ...prev];
+      saveLocalBackup(next, undefined, undefined);
+      return next;
+    });
+    localStorage.setItem('momo_needs_sync', 'true');
     try {
       await apiFetch('/api/transactions/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newTxs)
       });
+      localStorage.setItem('momo_needs_sync', 'false');
     } catch (err) {
-      console.error('Failed to save bulk transactions to SQLite', err);
+      console.warn('Transactions cached offline. Sync queued.', err);
     }
   };
 
-  const handleAddRevenueRecord = async (rec: AdRevenueRecord) => {
+  const handleAddRevenueRecord = async (rec: AdRevenueRecord, oldDate?: string | null) => {
     setRevenueRecords(prev => {
-      // If a record already exists for the same date, overwrite it to have correct records
-      const filtered = prev.filter(r => r.date !== rec.date);
-      return [...filtered, rec];
+      let filtered = prev;
+      if (oldDate) {
+        filtered = filtered.filter(r => r.date !== oldDate);
+      }
+      filtered = filtered.filter(r => r.date !== rec.date);
+      const next = [...filtered, rec];
+      saveLocalBackup(undefined, next, undefined);
+      return next;
     });
+    localStorage.setItem('momo_needs_sync', 'true');
     try {
+      if (oldDate && oldDate !== rec.date) {
+        await apiFetch(`/api/ad-revenue/${oldDate}`, {
+          method: 'DELETE'
+        });
+      }
       await apiFetch('/api/ad-revenue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(rec)
       });
+      localStorage.setItem('momo_needs_sync', 'false');
     } catch (err) {
-      console.error('Failed to save ad revenue to SQLite', err);
+      console.warn('Revenue log cached offline. Sync queued.', err);
     }
   };
 
   const handleDeleteRevenueRecord = async (date: string) => {
-    setRevenueRecords(prev => prev.filter(r => r.date !== date));
+    setRevenueRecords(prev => {
+      const next = prev.filter(r => r.date !== date);
+      saveLocalBackup(undefined, next, undefined);
+      return next;
+    });
+    localStorage.setItem('momo_needs_sync', 'true');
     try {
       await apiFetch(`/api/ad-revenue/${date}`, {
         method: 'DELETE'
       });
+      localStorage.setItem('momo_needs_sync', 'false');
     } catch (err) {
-      console.error('Failed to delete ad revenue from SQLite', err);
+      console.warn('Ad revenue deletion cached offline. Sync queued.', err);
     }
   };
 
   const handleDeleteTransaction = async (id: string) => {
-    setTransactions(prev => prev.filter(t => t.id !== id));
+    setTransactions(prev => {
+      const next = prev.filter(t => t.id !== id);
+      saveLocalBackup(next, undefined, undefined);
+      return next;
+    });
+    localStorage.setItem('momo_needs_sync', 'true');
     try {
       await apiFetch(`/api/transactions/${id}`, {
         method: 'DELETE'
       });
+      localStorage.setItem('momo_needs_sync', 'false');
     } catch (err) {
-      console.error('Failed to delete transaction from SQLite', err);
+      console.warn('Transaction deletion cached offline. Sync queued.', err);
     }
   };
 
   const handleUpdateTransactionCategory = async (id: string, newCategory: string) => {
-    setTransactions(prev => prev.map(t => t.id === id ? { ...t, category: newCategory } : t));
+    setTransactions(prev => {
+      const next = prev.map(t => t.id === id ? { ...t, category: newCategory } : t);
+      saveLocalBackup(next, undefined, undefined);
+      return next;
+    });
+    localStorage.setItem('momo_needs_sync', 'true');
     try {
       await apiFetch('/api/transactions/update-category', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, category: newCategory })
       });
+      localStorage.setItem('momo_needs_sync', 'false');
     } catch (err) {
-      console.error('Failed to update transaction category in SQLite', err);
+      console.warn('Category update cached offline. Sync queued.', err);
     }
   };
 
   const handleUpdateSettings = async (newSettings: AppSettings) => {
     setSettings(newSettings);
+    saveLocalBackup(undefined, undefined, newSettings);
+    localStorage.setItem('momo_needs_sync', 'true');
     try {
       await apiFetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSettings)
       });
+      localStorage.setItem('momo_needs_sync', 'false');
     } catch (err) {
-      console.error('Failed to save settings to SQLite', err);
+      console.warn('Settings update cached offline. Sync queued.', err);
     }
   };
 
@@ -279,7 +435,6 @@ export default function App() {
     const newSettings = { ...settings, customCategoryMappings: updatedMappings };
     setSettings(newSettings);
 
-    // Apply retroactively to existing loaded transactions containing the keyword
     const updatedTxs = transactions.map(t => {
       const normCP = t.counterparty.toLowerCase();
       if (normCP.includes(keyword.toLowerCase())) {
@@ -289,6 +444,8 @@ export default function App() {
     });
 
     setTransactions(updatedTxs);
+    saveLocalBackup(updatedTxs, undefined, newSettings);
+    localStorage.setItem('momo_needs_sync', 'true');
 
     const changedTxs = updatedTxs.filter((t, idx) => {
       const orig = transactions[idx];
@@ -296,14 +453,12 @@ export default function App() {
     });
 
     try {
-      // 1. Save Settings (includes current mappings)
       await apiFetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSettings)
       });
 
-      // 2. Persistently bulk update the category for any mutated transactions in SQLite
       if (changedTxs.length > 0) {
         await apiFetch('/api/transactions/bulk', {
           method: 'POST',
@@ -311,8 +466,9 @@ export default function App() {
           body: JSON.stringify(changedTxs)
         });
       }
+      localStorage.setItem('momo_needs_sync', 'false');
     } catch (err) {
-      console.error('Failed to save category mapping or apply retroactively to SQLite', err);
+      console.warn('Category mappings cached offline. Sync queued.', err);
     }
   };
 
@@ -414,11 +570,28 @@ export default function App() {
       <header className="border-b border-white/10 bg-white/5 backdrop-blur-md px-4 py-3.5 sticky top-0 z-30 shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 w-full">
           <div>
-            <h1 className="text-sm sm:text-base font-extrabold text-white tracking-tight flex items-center gap-2">
+            <h1 className="text-sm sm:text-base font-extrabold text-white tracking-tight flex items-center gap-1.5 flex-wrap">
               MomoSpend Suite
-              <span className="hidden sm:inline-block bg-blue-400/10 text-blue-300 text-[9px] font-mono px-2 py-0.5 rounded-full border border-white/10 uppercase tracking-widest font-bold">
+              <span className="hidden md:inline-block bg-blue-400/10 text-blue-300 text-[9px] font-mono px-2 py-0.5 rounded-full border border-white/10 uppercase tracking-widest font-bold">
                 PWA Ready
               </span>
+              
+              {isOffline ? (
+                <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[9px] font-mono px-2 py-0.5 rounded-full uppercase tracking-widest font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  Offline Mode
+                </span>
+              ) : isSyncing ? (
+                <span className="inline-flex items-center gap-1 bg-sky-500/10 text-sky-350 border border-sky-500/20 text-[9px] font-mono px-2 py-0.5 rounded-full uppercase tracking-widest font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping" />
+                  Syncing...
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-[9px] font-mono px-2 py-0.5 rounded-full uppercase tracking-widest font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  Synced
+                </span>
+              )}
             </h1>
             <p className="subtitle text-[10px] sm:text-[11px] text-white/50 line-clamp-1 sm:line-clamp-none max-w-[200px] sm:max-w-none font-medium">
               Automated Mobile Money SMS Parser & Website Ad Yield Dashboard

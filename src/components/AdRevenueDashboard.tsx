@@ -4,7 +4,7 @@ import { Landmark, Calendar, DollarSign, Cloud, Percent, ChevronRight, HelpCircl
 
 interface AdRevenueDashboardProps {
   revenueRecords: AdRevenueRecord[];
-  onAddRecord: (rec: AdRevenueRecord) => void;
+  onAddRecord: (rec: AdRevenueRecord, oldDate?: string | null) => void;
   onDeleteRecord: (date: string) => void;
   settings: AppSettings;
 }
@@ -77,7 +77,7 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
     setMonetag('');
     setAdsterra('');
     setProfiton('');
-    setServerCosts('1.5');
+    setServerCosts('0.0');
     setAdCosts('0.0');
     setDateTarget('today');
     setDate(new Date().toISOString().substring(0, 10));
@@ -103,12 +103,16 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
       checkedAt: new Date().toISOString()
     };
 
-    onAddRecord(newRec);
+    onAddRecord(newRec, editingDate);
 
     // reset fields gracefully
     setMonetag('');
     setAdsterra('');
     setProfiton('');
+    setServerCosts('0.0');
+    setAdCosts('0.0');
+    setDateTarget('today');
+    setDate(new Date().toISOString().substring(0, 10));
     setEditingDate(null);
   };
 
@@ -157,7 +161,6 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => handleQuickDateTap('today')}
-                  disabled={!!editingDate}
                   className={`py-1.5 rounded-lg cursor-pointer transition ${
                     dateTarget === 'today' ? 'bg-blue-600/80 text-white font-bold' : 'text-white/50 hover:text-white/80'
                   } disabled:opacity-55 disabled:cursor-not-allowed`}
@@ -167,7 +170,6 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => handleQuickDateTap('yesterday')}
-                  disabled={!!editingDate}
                   className={`py-1.5 rounded-lg cursor-pointer transition ${
                     dateTarget === 'yesterday' ? 'bg-blue-600/80 text-white font-bold' : 'text-white/50 hover:text-white/80'
                   } disabled:opacity-55 disabled:cursor-not-allowed`}
@@ -177,7 +179,6 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => handleQuickDateTap('custom')}
-                  disabled={!!editingDate}
                   className={`py-1.5 rounded-lg cursor-pointer transition ${
                     dateTarget === 'custom' ? 'bg-blue-600/80 text-white font-bold' : 'text-white/50 hover:text-white/80'
                   } disabled:opacity-55 disabled:cursor-not-allowed`}
@@ -190,7 +191,6 @@ export const AdRevenueDashboard: React.FC<AdRevenueDashboardProps> = ({
                 <input
                   type="date"
                   required
-                  disabled={!!editingDate}
                   className="w-full mt-2 bg-black/40 border border-white/15 rounded-xl px-3 py-2 text-base md:text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
                   value={date}
                   onChange={e => setDate(e.target.value)}
